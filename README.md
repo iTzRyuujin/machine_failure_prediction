@@ -1,108 +1,111 @@
-# Machine Failure Prediction with Random Forest
+# Machine Failure Prediction
 
-This project applies machine learning to industrial sensor data in order to predict machine failures.
+A machine learning pipeline that predicts industrial machine failures from sensor data using a Random Forest classifier.
 
-## Goal
+Built to explore whether failure prediction on highly imbalanced data is reliable — and what metrics actually tell you the truth when 96.6% of samples are non-failures.
 
-The goal of this project is to build a small and interpretable machine learning workflow for failure prediction based on industrial sensor measurements.
+---
+
+## Prerequisites — Data Validation
+
+Before training, sensor data quality is validated using
+[data-quality-pipeline](https://github.com/iTzRyuujin/data-quality-pipeline):
+
+```bash
+python data-quality-pipeline/analyze.py \
+  --input data/raw/data.csv \
+  --config data-quality-pipeline/config/ai4i_rules.yaml
+
+# Only proceed if exit code is 0 (no critical issues)
+python main.py
+```
+
+The AI4I dataset passes all quality checks — no missing values, all sensor readings within physically documented bounds.
+
+---
 
 ## Dataset
 
-Source: AI4I 2020 Predictive Maintenance Dataset from the UCI Machine Learning Repository.
+**AI4I 2020 Predictive Maintenance Dataset** — UCI Machine Learning Repository
+([doi.org/10.24432/C5HS5C](https://doi.org/10.24432/C5HS5C))
 
-The dataset contains industrial machine sensor data with the following features:
+10,000 rows of industrial sensor data with 6 features:
 
-- air temperature
-- process temperature
-- rotational speed
-- torque
-- tool wear
-- product type
+| Feature | Unit | Distribution |
+|---|---|---|
+| Air temperature | K | N(300, 2) |
+| Process temperature | K | Air temp + 10 K |
+| Rotational speed | rpm | Derived from 2860 W |
+| Torque | Nm | N(40, 10) |
+| Tool wear | min | 0 – 253 |
+| Product type | L/M/H | Categorical |
 
-Target variable:
+**Class imbalance:** 96.6% non-failure / 3.4% failure — accuracy alone is not a useful metric here.
 
-- machine failure
-
-## Workflow
-
-The project includes the following steps:
-
-- loading the dataset from CSV
-- preprocessing and cleaning the data
-- encoding the categorical feature `type`
-- splitting features and target
-- training a Random Forest classifier
-- evaluating the model with classification metrics
-- exporting predictions and visual outputs
-
-## Model
-
-A Random Forest classifier is used because it works well on tabular data, is easy to apply, and provides interpretable feature importance values.
+---
 
 ## Results
 
-The model achieved the following results on the test set:
+| Metric | Value |
+|---|---|
+| Accuracy | 98.15% |
+| Precision | 87.8% |
+| Recall | 52.94% |
+| F1 Score | 66.06% |
+| **AUC** | **96.69%** |
 
-- Accuracy: 0.9815
-- Precision: 0.8780
-- Recall: 0.5294
-- F1 Score: 0.6606
+### Why AUC, not Accuracy?
 
-The model achieved strong precision and high overall accuracy, but recall remained moderate.  
-This means that predicted failures are often correct, but a relevant share of actual failures is still missed.
+A model that always predicts "no failure" achieves 96.6% accuracy — without learning anything. AUC measures whether the model can actually **distinguish failures from normal operation**, independent of any threshold choice. AUC = 0.967 means the model has strong separability even where the default threshold hurts recall.
 
-## Why Accuracy Alone Is Not Enough
+The recall gap (52.94%) reflects a deliberate threshold tradeoff: at 0.5, the model is conservative. Lowering the threshold increases recall at the cost of more false alarms (unnecessary maintenance triggers) — a decision that belongs to the domain engineer, not the model.
 
-The dataset is imbalanced, which means machine failures are much rarer than normal cases.  
-Because of that, accuracy alone is not a sufficient metric. Precision and recall are more important for understanding how well the model detects failures.
+---
 
 ## Feature Importance
 
-The most important predictors in this project were:
+Top predictors for machine failure:
 
-- torque
-- rotational speed
-- tool wear
+1. **Torque** — mechanical overload is the dominant failure signal
+2. **Rotational speed** — power-related stress indicator
+3. **Tool wear** — cumulative degradation over time
 
-This suggests that mechanical load related features contribute most strongly to failure prediction in this dataset.
+---
 
 ## Outputs
 
-The project generates the following outputs:
+```
+outputs/
+├── predictions.csv         # actual, predicted, predicted_probability
+├── metrics.txt             # all metrics + classification report
+├── confusion_matrix.png
+├── feature_importance.png
+└── roc_curve.png           # ROC curve with AUC score
+```
 
-- `outputs/predictions.csv`
-- `outputs/metrics.txt`
-- `outputs/confusion_matrix.png`
-- `outputs/feature_importance.png`
+---
 
 ## Project Structure
 
-```text
-machine-failure-prediction/
-│
+```
+machine_failure_prediction/
 ├── data/
 │   ├── raw/
 │   │   └── data.csv
 │   └── create_data.py
-│
 ├── outputs/
-│   ├── metrics.txt
-│   ├── confusion_matrix.png
-│   ├── feature_importance.png
-│   └── predictions.csv
-│
 ├── src/
 │   ├── load_data.py
 │   ├── preprocess.py
 │   ├── train.py
 │   ├── evaluate.py
 │   └── visualize.py
-│
 ├── main.py
 ├── requirements.txt
-├── .gitignore
 └── README.md
+```
 
+---
 
 ## How to Run
 
@@ -112,3 +115,4 @@ venv\Scripts\activate
 pip install -r requirements.txt
 python data/create_data.py
 python main.py
+```

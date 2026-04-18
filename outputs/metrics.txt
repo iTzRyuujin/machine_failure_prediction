@@ -1,52 +1,8 @@
 accuracy: 0.9815
-
-Classification Report:
-              precision    recall  f1-score   support
-
-           0       0.98      1.00      0.99      1932
-           1       0.88      0.53      0.66        68
-
-    accuracy                           0.98      2000
-   macro avg       0.93      0.76      0.83      2000
-weighted avg       0.98      0.98      0.98      2000
-
-Interpretation:
-The model achieved high overall accuracy and strong precision for failure predictions.
-Recall is moderate, which means that a relevant share of actual failures is still missed.
-This reflects the challenge of imbalanced classification in predictive maintenance data.
 precision: 0.8780
-
-Classification Report:
-              precision    recall  f1-score   support
-
-           0       0.98      1.00      0.99      1932
-           1       0.88      0.53      0.66        68
-
-    accuracy                           0.98      2000
-   macro avg       0.93      0.76      0.83      2000
-weighted avg       0.98      0.98      0.98      2000
-
-Interpretation:
-The model achieved high overall accuracy and strong precision for failure predictions.
-Recall is moderate, which means that a relevant share of actual failures is still missed.
-This reflects the challenge of imbalanced classification in predictive maintenance data.
 recall: 0.5294
-
-Classification Report:
-              precision    recall  f1-score   support
-
-           0       0.98      1.00      0.99      1932
-           1       0.88      0.53      0.66        68
-
-    accuracy                           0.98      2000
-   macro avg       0.93      0.76      0.83      2000
-weighted avg       0.98      0.98      0.98      2000
-
-Interpretation:
-The model achieved high overall accuracy and strong precision for failure predictions.
-Recall is moderate, which means that a relevant share of actual failures is still missed.
-This reflects the challenge of imbalanced classification in predictive maintenance data.
 f1_score: 0.6606
+roc_auc: 0.9669
 
 Classification Report:
               precision    recall  f1-score   support
@@ -62,3 +18,4 @@ Interpretation:
 The model achieved high overall accuracy and strong precision for failure predictions.
 Recall is moderate, which means that a relevant share of actual failures is still missed.
 This reflects the challenge of imbalanced classification in predictive maintenance data.
+AUC evaluates model separability across all thresholds — more reliable than accuracy for imbalanced data.
